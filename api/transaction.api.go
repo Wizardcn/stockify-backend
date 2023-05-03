@@ -15,11 +15,11 @@ func SetupTransactionAPI(router *gin.Engine) {
 }
 
 func getTransaction(c *gin.Context) {
-	c.JSON(http.StatusOK, gin.H{"result": "get transaction"})
+	c.JSON(http.StatusOK, gin.H{"result": "List transaction"})
 }
 
 func createTransaction(c *gin.Context) {
 
-	c.JSON(http.StatusCreated, gin.H{"result": "create transaction"})
+	c.JSON(http.StatusCreated, gin.H{"result": "Create transaction"})
 
 }
