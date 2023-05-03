@@ -11,5 +11,5 @@ func main() {
 	router.Static("/images", "./uploaded/images")
 
 	api.SetupRouter(router)
-	router.Run(":8081")
+	router.Run(":8082")
 }
