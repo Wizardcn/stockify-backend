@@ -10,6 +10,18 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+type TransactionResult struct {
+	ID            uint
+	Total         float64
+	Paid          float64
+	Change        float64
+	PaymentType   string
+	PaymentDetail string
+	OrderList     string
+	Staff         string
+	CreatedAt     time.Time
+}
+
 func SetupTransactionAPI(router *gin.Engine) {
 	transactionAPIv2 := router.Group("api/v2")
 	{
@@ -19,9 +31,22 @@ func SetupTransactionAPI(router *gin.Engine) {
 }
 
 func getTransactions(c *gin.Context) {
-	var transactions []model.Transaction
-	db.GetDB().Find(&transactions)
-	c.JSON(http.StatusOK, transactions)
+	var result []TransactionResult
+
+	db.GetDB().Debug().Raw(`
+		SELECT transactions.id, 
+			total, 
+			paid, 
+			change, 
+			payment_type, 
+			payment_detail,  
+			order_list, 
+			users.username as staff, 
+			transactions.created_at
+		FROM transactions JOIN users 
+		ON transactions.staff_id = users.id;
+	`, nil).Scan(&result)
+	c.JSON(http.StatusOK, result)
 }
 
 func createTransaction(c *gin.Context) {
