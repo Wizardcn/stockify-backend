@@ -28,7 +28,13 @@ func SetupProductAPI(router *gin.Engine) {
 func getProducts(c *gin.Context) {
 
 	var products []model.Product
-	db.GetDB().Find(&products)
+	keyword := c.Query("keyword")
+	if keyword != "" {
+		keyword = fmt.Sprintf("%%%s%%", keyword)
+		db.GetDB().Where("name like ?", keyword).Find(&products)
+	} else {
+		db.GetDB().Find(&products)
+	}
 
 	c.JSON(http.StatusOK, products)
 }
