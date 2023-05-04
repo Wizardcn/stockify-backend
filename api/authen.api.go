@@ -3,10 +3,10 @@ package api
 import (
 	"net/http"
 	"stockify/db"
+	"stockify/interceptor"
 	"stockify/model"
 	"time"
 
-	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -29,21 +29,12 @@ func login(c *gin.Context) {
 		} else if !checkPasswordHash(user.Password, queryUser.Password) {
 			c.JSON(200, gin.H{"result": "nok", "error": "invalid password"})
 		} else {
-			// token := interceptor.JwtSign(queryUser)
-			alClaims := jwt.MapClaims{}
-			// Payload begin
-			alClaims["id"] = queryUser.ID
-			alClaims["username"] = queryUser.Username
-			alClaims["level"] = queryUser.Level
-			alClaims["exp"] = time.Now().Add(time.Minute * 15).Unix()
-			// Payload end
-			at := jwt.NewWithClaims(jwt.SigningMethodHS256, alClaims)
-			token, _ := at.SignedString(([]byte("1234")))
-			c.JSON(200, gin.H{"result": "ok", "data": token})
+			token := interceptor.JwtSign(queryUser)
+			c.JSON(http.StatusOK, gin.H{"result": "ok", "data": token})
 		}
 
 	} else {
-		c.JSON(401, gin.H{"status": "unable to bind data"})
+		c.JSON(http.StatusUnauthorized, gin.H{"status": "unable to bind data"})
 	}
 }
 

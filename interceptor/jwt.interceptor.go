@@ -3,11 +3,28 @@ package interceptor
 import (
 	"fmt"
 	"net/http"
+	"stockify/model"
 	"strings"
+	"time"
 
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
 )
+
+var secretKey string = "12351935"
+
+func JwtSign(payload model.User) string {
+	alClaims := jwt.MapClaims{}
+	// Payload begin
+	alClaims["id"] = payload.ID
+	alClaims["username"] = payload.Username
+	alClaims["level"] = payload.Level
+	alClaims["exp"] = time.Now().Add(time.Minute * 15).Unix()
+	// Payload end
+	at := jwt.NewWithClaims(jwt.SigningMethodHS256, alClaims)
+	token, _ := at.SignedString(([]byte(secretKey)))
+	return token
+}
 
 func JwtVertify(c *gin.Context) {
 	tokenString := strings.Split(c.Request.Header["Authorization"][0], " ")[1]
@@ -16,12 +33,13 @@ func JwtVertify(c *gin.Context) {
 			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
 		}
 
-		return []byte("1234"), nil
+		return []byte(secretKey), nil
 	})
 
 	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
-		fmt.Println(claims)
+		// fmt.Println(claims)
 		c.Set("jwt_username", claims["username"])
+		c.Set("jwt_level", claims["level"])
 		c.Next()
 	} else {
 		c.JSON(http.StatusOK, gin.H{"result": "nok", "error": err})
