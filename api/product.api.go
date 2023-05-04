@@ -18,20 +18,25 @@ import (
 func SetupProductAPI(router *gin.Engine) {
 	productAPIv2 := router.Group("/api/v2")
 	{
-		productAPIv2.GET("/product" /*interceptor.JwtVertify,*/, getProduct)
+		productAPIv2.GET("/product" /*interceptor.JwtVertify,*/, getProducts)
+		productAPIv2.GET("/product/:id" /*interceptor.JwtVertify,*/, getProductByID)
 		productAPIv2.POST("/product" /*interceptor.JwtVertify,*/, createProduct)
 		productAPIv2.PUT("/product" /*interceptor.JwtVertify,*/, editProduct)
 	}
 }
 
-func getProduct(c *gin.Context) {
+func getProducts(c *gin.Context) {
 
-	product := model.Product{}
+	var products []model.Product
+	db.GetDB().Find(&products)
 
-	id := c.Query("id")
-	db.GetDB().First(&product, id)
+	c.JSON(http.StatusOK, products)
+}
 
-	c.JSON(http.StatusOK, gin.H{"result": product})
+func getProductByID(c *gin.Context) {
+	var product model.Product
+	db.GetDB().Where("id = ?", c.Param("id")).First(&product)
+	c.JSON(http.StatusOK, product)
 }
 
 func fileExists(filename string) bool {
