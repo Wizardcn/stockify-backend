@@ -31,10 +31,12 @@ func login(c *gin.Context) {
 		} else {
 			// token := interceptor.JwtSign(queryUser)
 			alClaims := jwt.MapClaims{}
+			// Payload begin
 			alClaims["id"] = queryUser.ID
 			alClaims["username"] = queryUser.Username
 			alClaims["level"] = queryUser.Level
 			alClaims["exp"] = time.Now().Add(time.Minute * 15).Unix()
+			// Payload end
 			at := jwt.NewWithClaims(jwt.SigningMethodHS256, alClaims)
 			token, _ := at.SignedString(([]byte("1234")))
 			c.JSON(200, gin.H{"result": "ok", "data": token})
