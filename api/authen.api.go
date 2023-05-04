@@ -6,6 +6,7 @@ import (
 	"stockify/model"
 	"time"
 
+	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -29,7 +30,14 @@ func login(c *gin.Context) {
 			c.JSON(200, gin.H{"result": "nok", "error": "invalid password"})
 		} else {
 			// token := interceptor.JwtSign(queryUser)
-			c.JSON(200, gin.H{"result": "ok", "data": user})
+			alClaims := jwt.MapClaims{}
+			alClaims["id"] = queryUser.ID
+			alClaims["username"] = queryUser.Username
+			alClaims["level"] = queryUser.Level
+			alClaims["exp"] = time.Now().Add(time.Minute * 15).Unix()
+			at := jwt.NewWithClaims(jwt.SigningMethodHS256, alClaims)
+			token, _ := at.SignedString(([]byte("1234")))
+			c.JSON(200, gin.H{"result": "ok", "data": token})
 		}
 
 	} else {
