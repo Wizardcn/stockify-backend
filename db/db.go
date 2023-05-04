@@ -22,6 +22,7 @@ func SetupDB() {
 	}
 
 	database.AutoMigrate(&model.User{}) // pass by reference
+	database.AutoMigrate(&model.Product{})
 
 	db = database
 }
