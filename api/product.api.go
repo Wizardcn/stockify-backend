@@ -10,7 +10,6 @@ import (
 	"time"
 
 	"stockify/db"
-	"stockify/interceptor"
 	"stockify/model"
 
 	"github.com/gin-gonic/gin"
@@ -19,18 +18,20 @@ import (
 func SetupProductAPI(router *gin.Engine) {
 	productAPIv2 := router.Group("/api/v2")
 	{
-		productAPIv2.GET("/product", interceptor.JwtVertify, getProduct)
-		productAPIv2.POST("/product", interceptor.JwtVertify, createProduct)
+		productAPIv2.GET("/product" /*interceptor.JwtVertify,*/, getProduct)
+		productAPIv2.POST("/product" /*interceptor.JwtVertify,*/, createProduct)
+		productAPIv2.PUT("/product" /*interceptor.JwtVertify,*/, editProduct)
 	}
 }
 
 func getProduct(c *gin.Context) {
-	c.JSON(http.StatusOK, gin.H{
-		"result":   "get product",
-		"username": c.GetString("jwt_username"),
-		"level":    c.GetString("jwt_level"),
-	})
-	// c.JSON(http.StatusOK, gin.H{"result": "get product"})
+
+	product := model.Product{}
+
+	id := c.Query("id")
+	db.GetDB().First(&product, id)
+
+	c.JSON(http.StatusOK, gin.H{"result": product})
 }
 
 func fileExists(filename string) bool {
@@ -74,5 +75,19 @@ func createProduct(c *gin.Context) {
 	image, _ := c.FormFile("image")
 	saveImage(image, &product, c)
 
+	c.JSON(http.StatusOK, gin.H{"result": product})
+}
+
+func editProduct(c *gin.Context) {
+	var product model.Product
+	id, _ := strconv.ParseInt(c.PostForm("id"), 10, 32)
+	product.ID = uint(id)
+	product.Name = c.PostForm("name")
+	product.Stock, _ = strconv.ParseInt(c.PostForm("stock"), 10, 64)
+	product.Price, _ = strconv.ParseFloat(c.PostForm("price"), 64)
+
+	db.GetDB().Save(&product) // pass by ref
+	image, _ := c.FormFile("image")
+	saveImage(image, &product, c)
 	c.JSON(http.StatusOK, gin.H{"result": product})
 }
