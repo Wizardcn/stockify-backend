@@ -17,7 +17,12 @@ func SetupProductAPI(router *gin.Engine) {
 }
 
 func getProduct(c *gin.Context) {
-	c.JSON(http.StatusOK, gin.H{"result": "get product"})
+	c.JSON(http.StatusOK, gin.H{
+		"result":   "get product",
+		"username": c.GetString("jwt_username"),
+		"level":    c.GetString("jwt_level"),
+	})
+	// c.JSON(http.StatusOK, gin.H{"result": "get product"})
 }
 
 func createProduct(c *gin.Context) {
