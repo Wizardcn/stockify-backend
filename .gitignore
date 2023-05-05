@@ -72,3 +72,5 @@ tmp/*
 
 # bash script
 *.sh
+
+.env*
