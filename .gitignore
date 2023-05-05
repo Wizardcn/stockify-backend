@@ -69,3 +69,6 @@ go.work
 # go fresh
 tmp/*
 *.conf
+
+# bash script
+*.sh
