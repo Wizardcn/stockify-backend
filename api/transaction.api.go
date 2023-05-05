@@ -1,6 +1,7 @@
 package api
 
 import (
+	"fmt"
 	"net/http"
 	"stockify/db"
 	"stockify/interceptor"
@@ -33,19 +34,21 @@ func SetupTransactionAPI(router *gin.Engine) {
 func getTransactions(c *gin.Context) {
 	var result []TransactionResult
 
-	db.GetDB().Debug().Raw(`
+	sql_query := fmt.Sprintf(`
 		SELECT transactions.id, 
 			total, 
 			paid, 
-			change, 
+			%schange%s, 
 			payment_type, 
 			payment_detail,  
 			order_list, 
 			users.username as staff, 
 			transactions.created_at
-		FROM transactions JOIN users 
+		FROM transactions LEFT JOIN users
 		ON transactions.staff_id = users.id;
-	`, nil).Scan(&result)
+	`, "`", "`")
+
+	db.GetDB().Debug().Raw(sql_query).Scan(&result)
 	c.JSON(http.StatusOK, result)
 }
 
